@@ -1,0 +1,116 @@
+{
+  "entities": {
+    "User": {
+      "title": "User",
+      "description": "Registered member profile with preferences, roles, and habit streaks",
+      "type": "object",
+      "properties": {
+        "uid": { "type": "string", "maxLength": 128 },
+        "fullName": { "type": "string", "maxLength": 100 },
+        "email": { "type": "string", "format": "email", "maxLength": 150 },
+        "mobile": { "type": "string", "maxLength": 30 },
+        "preferredLanguage": { "type": "string", "enum": ["en", "bn"] },
+        "role": { "type": "string", "enum": ["member", "admin"] },
+        "membershipStatus": { "type": "string", "enum": ["active", "inactive", "pending"] },
+        "wellnessGoals": { "type": "string", "maxLength": 500 },
+        "createdAt": { "type": "string" },
+        "updatedAt": { "type": "string" }
+      },
+      "required": ["uid", "fullName", "email", "role", "membershipStatus"]
+    },
+    "Program": {
+      "title": "Program",
+      "description": "Holistic non-gym wellness curriculum",
+      "type": "object",
+      "properties": {
+        "id": { "type": "string", "maxLength": 128 },
+        "title": { "type": "string", "maxLength": 200 },
+        "category": { "type": "string", "enum": ["lifestyle", "nutrition", "morning", "evening", "consultation", "community"] },
+        "price": { "type": "number" },
+        "published": { "type": "boolean" },
+        "createdAt": { "type": "string" }
+      },
+      "required": ["id", "title", "category", "price", "published"]
+    },
+    "Enrollment": {
+      "title": "Enrollment",
+      "description": "Member enrollment record in a wellness program",
+      "type": "object",
+      "properties": {
+        "id": { "type": "string", "maxLength": 128 },
+        "userId": { "type": "string", "maxLength": 128 },
+        "programId": { "type": "string", "maxLength": 128 },
+        "status": { "type": "string", "enum": ["active", "completed", "cancelled", "pending_payment"] },
+        "amountPaid": { "type": "number" },
+        "enrolledAt": { "type": "string" }
+      },
+      "required": ["id", "userId", "programId", "status", "enrolledAt"]
+    },
+    "WellnessEvent": {
+      "title": "WellnessEvent",
+      "description": "Live virtual or in-person wellness circle",
+      "type": "object",
+      "properties": {
+        "id": { "type": "string", "maxLength": 128 },
+        "title": { "type": "string", "maxLength": 200 },
+        "startAt": { "type": "string" },
+        "endAt": { "type": "string" },
+        "format": { "type": "string", "enum": ["online", "offline"] },
+        "capacity": { "type": "number" },
+        "status": { "type": "string", "enum": ["upcoming", "live", "completed", "cancelled"] }
+      },
+      "required": ["id", "title", "startAt", "format", "status"]
+    },
+    "HabitLog": {
+      "title": "HabitLog",
+      "description": "Daily mindful habit checklist entry",
+      "type": "object",
+      "properties": {
+        "id": { "type": "string", "maxLength": 128 },
+        "userId": { "type": "string", "maxLength": 128 },
+        "date": { "type": "string", "maxLength": 10 },
+        "energyLevel": { "type": "number" }
+      },
+      "required": ["id", "userId", "date"]
+    },
+    "PaymentRecord": {
+      "title": "PaymentRecord",
+      "description": "Verified transaction record and receipt data",
+      "type": "object",
+      "properties": {
+        "id": { "type": "string", "maxLength": 128 },
+        "transactionReference": { "type": "string", "maxLength": 64 },
+        "userId": { "type": "string", "maxLength": 128 },
+        "amount": { "type": "number" },
+        "status": { "type": "string", "enum": ["completed", "pending", "failed", "refunded"] }
+      },
+      "required": ["id", "transactionReference", "userId", "amount", "status"]
+    }
+  },
+  "firestore": {
+    "/users/{userId}": {
+      "schema": "User",
+      "description": "User profiles with strict owner-only PII read/write"
+    },
+    "/programs/{programId}": {
+      "schema": "Program",
+      "description": "Publicly readable wellness programs, writable only by admins"
+    },
+    "/enrollments/{enrollmentId}": {
+      "schema": "Enrollment",
+      "description": "Member program enrollment records"
+    },
+    "/events/{eventId}": {
+      "schema": "WellnessEvent",
+      "description": "Scheduled online sessions and workshops"
+    },
+    "/habitLogs/{logId}": {
+      "schema": "HabitLog",
+      "description": "Personal daily habit logs restricted to member owner"
+    },
+    "/payments/{paymentId}": {
+      "schema": "PaymentRecord",
+      "description": "Payment records accessible by paying user and admins"
+    }
+  }
+}

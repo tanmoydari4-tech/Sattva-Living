@@ -1,0 +1,8 @@
+{
+  "name": "Sattva Living - Holistic Wellness Community",
+  "description": "Premium fitness and wellness community dedicated to healthy lifestyle habits, nutrition education, daily movement, mindfulness, and online wellness sessions without gym culture.",
+  "requestFramePermissions": [],
+  "majorCapabilities": [
+    "MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"
+  ]
+}
