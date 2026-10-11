@@ -2,32 +2,31 @@
 <html lang="en">
   <head>
     <meta charset="utf-8" />
-    <title>Sattva Living - Holistic Wellness Community</title>
+    <title>Redirecting...</title>
     <script type="text/javascript">
-      // ----------------------------------------------------------------------
-      // Single Page Apps for GitHub Pages
-      // MIT License
-      // https://github.com/rafgraph/spa-github-pages
-      // This script takes the current url and converts the path and query
-      // string into just a query string, and then redirects the browser
-      // to the new url with only a query string and hash fragment.
-      // ----------------------------------------------------------------------
-      // If deployed as a Project Page (e.g. username.github.io/repo-name),
-      // pathSegmentsToKeep is 1. If deployed to a custom domain (e.g. example.com)
-      // or User Page (e.g. username.github.io), pathSegmentsToKeep is 0.
-      var isProjectPage = window.location.hostname.endsWith('github.io') && window.location.pathname.split('/').filter(Boolean).length > 0;
-      var pathSegmentsToKeep = isProjectPage ? 1 : 0;
+      // GitHub Pages Hash Router fallback redirect
+      (function() {
+        var l = window.location;
+        var path = l.pathname;
+        var segments = path.split('/').filter(Boolean);
+        // If hosted on GitHub Pages as a project repository (username.github.io/repo-name)
+        var isGithubIo = l.hostname.endsWith('github.io');
+        var repo = (isGithubIo && segments.length > 0) ? segments[0] : '';
+        var remainingPath = (isGithubIo && segments.length > 0) 
+          ? segments.slice(1).join('/') 
+          : segments.join('/');
+        
+        var targetPath = repo ? ('/' + repo) : '';
+        var targetRoute = remainingPath ? ('/' + remainingPath) : '/';
+        var search = l.search || '';
+        var hash = l.hash || '';
 
-      var l = window.location;
-      l.replace(
-        l.protocol + '//' + l.hostname + (l.port ? ':' + l.port : '') +
-        l.pathname.split('/').slice(0, 1 + pathSegmentsToKeep).join('/') + '/?/' +
-        l.pathname.slice(1).split('/').slice(pathSegmentsToKeep).join('/').replace(/&/g, '~and~') +
-        (l.search ? '&' + l.search.slice(1).replace(/&/g, '~and~') : '') +
-        l.hash
-      );
+        var redirectUrl = l.protocol + '//' + l.host + targetPath + '/#' + targetRoute + search + hash;
+        l.replace(redirectUrl);
+      })();
     </script>
   </head>
   <body>
+    <p>Redirecting to application...</p>
   </body>
 </html>

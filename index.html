@@ -15,17 +15,15 @@
     <!-- GitHub Pages Single Page App Redirect Restoration -->
     <script type="text/javascript">
       (function(l) {
-        if (l.search[1] === '/' ) {
+        if (l.search[1] === '/') {
           var decoded = l.search.slice(1).split('&').map(function(s) { 
             return s.replace(/~and~/g, '&');
           }).join('?');
-          window.history.replaceState(null, null,
-            l.pathname.slice(0, -1) + decoded + l.hash
-          );
+          l.replace(l.pathname + '#/' + decoded.replace(/^\//, '') + l.hash);
         }
       }(window.location));
     </script>
-    <script type="module" crossorigin src="./assets/index-DJdhKzQX.js"></script>
+    <script type="module" crossorigin src="./assets/index-DX9C1HP3.js"></script>
     <link rel="stylesheet" crossorigin href="./assets/index-CtHrm1r1.css">
   </head>
   <body class="bg-[#F8F6F0] text-[#252A27] font-sans antialiased selection:bg-[#A8BDA5]/40 selection:text-[#153D32]">
