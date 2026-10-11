@@ -1,13 +1,13 @@
 import React, { useState } from 'react';
 import { Link, useNavigate, useLocation } from 'react-router-dom';
-import { Lock, Mail, ArrowRight, Sparkles, User, Shield } from 'lucide-react';
+import { Lock, Mail } from 'lucide-react';
 import { useLanguage } from '../i18n/LanguageContext';
 import { useAuth } from '../context/AuthContext';
 import { useToast } from '../components/Toast';
 
 export const MemberLogin: React.FC = () => {
   const { t, isBengali } = useLanguage();
-  const { login, quickLoginAsMember, quickLoginAsAdmin } = useAuth();
+  const { login } = useAuth();
   const { showToast } = useToast();
   const navigate = useNavigate();
   const location = useLocation();
@@ -37,18 +37,6 @@ export const MemberLogin: React.FC = () => {
     }
   };
 
-  const handleQuickMember = () => {
-    quickLoginAsMember();
-    showToast(isBengali ? 'ডেমো মেম্বার হিসেবে লগইন করা হয়েছে।' : 'Signed in as Demo Member.', 'success');
-    navigate('/member/dashboard', { replace: true });
-  };
-
-  const handleQuickAdmin = () => {
-    quickLoginAsAdmin();
-    showToast(isBengali ? 'অ্যাডমিন হিসেবে লগইন করা হয়েছে।' : 'Signed in as Chief Wellness Admin.', 'success');
-    navigate('/admin', { replace: true });
-  };
-
   return (
     <div className="min-h-[80vh] flex items-center justify-center px-4 py-16">
       <div className="max-w-md w-full bg-white rounded-3xl p-8 sm:p-10 border border-[#A8BDA5]/40 shadow-xl space-y-6">
@@ -62,31 +50,6 @@ export const MemberLogin: React.FC = () => {
           <p className="text-xs sm:text-sm text-[#252A27]/70">
             {t.member.loginSubtitle}
           </p>
-        </div>
-
-        {/* Quick Demo Sign-in Helpers */}
-        <div className="p-4 bg-[#F8F6F0] rounded-2xl border border-[#A8BDA5]/30 space-y-2.5">
-          <span className="text-[11px] font-semibold text-[#153D32] uppercase tracking-wider block text-center">
-            {t.member.quickDemo}
-          </span>
-          <div className="grid grid-cols-2 gap-2">
-            <button
-              type="button"
-              onClick={handleQuickMember}
-              className="inline-flex items-center justify-center gap-1.5 py-2 px-3 rounded-xl bg-white border border-[#A8BDA5]/40 text-xs font-semibold text-[#153D32] hover:bg-[#153D32] hover:text-white transition-colors shadow-2xs"
-            >
-              <User className="w-3.5 h-3.5" />
-              <span>{t.member.demoMember}</span>
-            </button>
-            <button
-              type="button"
-              onClick={handleQuickAdmin}
-              className="inline-flex items-center justify-center gap-1.5 py-2 px-3 rounded-xl bg-white border border-[#A8BDA5]/40 text-xs font-semibold text-[#153D32] hover:bg-[#153D32] hover:text-white transition-colors shadow-2xs"
-            >
-              <Shield className="w-3.5 h-3.5" />
-              <span>{t.member.demoAdmin}</span>
-            </button>
-          </div>
         </div>
 
         <form onSubmit={handleLogin} className="space-y-4">
