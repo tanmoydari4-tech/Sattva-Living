@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useEffect } from 'react';
 import { HashRouter, Routes, Route, useLocation } from 'react-router-dom';
 import { LanguageProvider } from './i18n/LanguageContext';
 import { AuthProvider } from './context/AuthContext';
@@ -6,6 +6,7 @@ import { ToastProvider } from './components/Toast';
 import { Navbar } from './components/Navbar';
 import { Footer } from './components/Footer';
 import { ProtectedRoute } from './components/ProtectedRoute';
+import { useStoreVersion, store } from './services/store';
 
 // Public & Community Pages
 import { Home } from './pages/Home';
@@ -50,16 +51,28 @@ import { TermsConditions } from './pages/TermsConditions';
 import { RefundPolicy } from './pages/RefundPolicy';
 import { NotFound } from './pages/NotFound';
 
-// Layout Controller: Hide public header & footer on Admin suite
+// Layout Controller: Hide public header & footer on Admin suite and reactively re-render on data store changes
 const LayoutWrapper: React.FC<{ children: React.ReactNode }> = ({ children }) => {
   const location = useLocation();
   const isAdminRoute = location.pathname.startsWith('/admin') && location.pathname !== '/admin/login';
+  const storeVersion = useStoreVersion();
+
+  // Listen for storage events across open browser tabs so admin changes appear instantaneously
+  useEffect(() => {
+    const handleStorage = (e: StorageEvent) => {
+      if (e.key && e.key.startsWith('sattva_')) {
+        store.reloadFromLocalStorage();
+      }
+    };
+    window.addEventListener('storage', handleStorage);
+    return () => window.removeEventListener('storage', handleStorage);
+  }, []);
 
   return (
     <div className="min-h-screen flex flex-col bg-[#F8F6F0] text-[#252A27]">
-      {!isAdminRoute && <Navbar />}
-      <div className="flex-1">{children}</div>
-      {!isAdminRoute && <Footer />}
+      {!isAdminRoute && <Navbar key={`nav-${storeVersion}`} />}
+      <div key={`content-${storeVersion}`} className="flex-1">{children}</div>
+      {!isAdminRoute && <Footer key={`footer-${storeVersion}`} />}
     </div>
   );
 };

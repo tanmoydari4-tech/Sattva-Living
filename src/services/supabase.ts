@@ -1,5 +1,19 @@
 import { createClient } from '@supabase/supabase-js';
-import { User, Enrollment, EventRegistration, Enquiry, HabitLog, PaymentRecord } from '../types';
+import {
+  User,
+  Enrollment,
+  EventRegistration,
+  Enquiry,
+  HabitLog,
+  PaymentRecord,
+  WebsiteSettings,
+  Program,
+  WellnessEvent,
+  Article,
+  Testimonial,
+  GalleryItem,
+  Announcement,
+} from '../types';
 
 export const SUPABASE_PROJECT_ID = 'atmnwxgvnfsrinqrzvij';
 export const SUPABASE_URL = (import.meta.env.VITE_SUPABASE_URL as string) || `https://${SUPABASE_PROJECT_ID}.supabase.co`;
@@ -226,6 +240,115 @@ export async function syncPaymentToSupabase(payment: PaymentRecord): Promise<voi
     }
   } catch (err) {
     console.warn('Supabase Payment sync caught exception:', err);
+  }
+}
+
+/**
+ * Save / Sync Site Content record (Settings, Programs, Events, Articles, etc.) to Supabase
+ */
+export async function syncContentItemToSupabase(key: string, data: any): Promise<boolean> {
+  try {
+    const payload = {
+      id: key,
+      name: `System Cloud Sync [${key}]`,
+      email: 'system_sync@sattvaliving.internal',
+      category: 'system_sync',
+      message: JSON.stringify(data),
+      consent_given: true,
+      status: 'system',
+      reply_notes: new Date().toISOString(),
+    };
+    const { error } = await supabase
+      .from('enquiries')
+      .upsert(payload, { onConflict: 'id' });
+    if (error) {
+      console.warn(`Supabase sync note for ${key}:`, error.message);
+      return false;
+    }
+    console.log(`✅ Cloud storage updated for [${key}] in Supabase`);
+    return true;
+  } catch (err) {
+    console.warn(`Supabase sync caught error for ${key}:`, err);
+    return false;
+  }
+}
+
+/**
+ * Fetch all cloud synced website content from Supabase
+ */
+export async function fetchAllCloudSyncFromSupabase(): Promise<{
+  settings?: WebsiteSettings;
+  programs?: Program[];
+  events?: WellnessEvent[];
+  articles?: Article[];
+  testimonials?: Testimonial[];
+  gallery?: GalleryItem[];
+  announcements?: Announcement[];
+}> {
+  try {
+    const { data, error } = await supabase
+      .from('enquiries')
+      .select('id, message')
+      .eq('category', 'system_sync');
+    if (error || !data) return {};
+
+    const result: {
+      settings?: WebsiteSettings;
+      programs?: Program[];
+      events?: WellnessEvent[];
+      articles?: Article[];
+      testimonials?: Testimonial[];
+      gallery?: GalleryItem[];
+      announcements?: Announcement[];
+    } = {};
+
+    for (const row of data) {
+      try {
+        const parsed = JSON.parse(row.message);
+        if (row.id === 'sync_settings') result.settings = parsed;
+        if (row.id === 'sync_programs') result.programs = parsed;
+        if (row.id === 'sync_events') result.events = parsed;
+        if (row.id === 'sync_articles') result.articles = parsed;
+        if (row.id === 'sync_testimonials') result.testimonials = parsed;
+        if (row.id === 'sync_gallery') result.gallery = parsed;
+        if (row.id === 'sync_announcements') result.announcements = parsed;
+      } catch (e) {
+        console.warn(`Error parsing cloud sync item ${row.id}:`, e);
+      }
+    }
+    return result;
+  } catch (err) {
+    console.warn('Failed to fetch cloud sync from Supabase:', err);
+    return {};
+  }
+}
+
+/**
+ * Fetch public contact enquiries from Supabase
+ */
+export async function fetchEnquiriesFromSupabase(): Promise<Enquiry[]> {
+  try {
+    const { data, error } = await supabase
+      .from('enquiries')
+      .select('*')
+      .neq('category', 'system_sync')
+      .neq('category', 'system_config')
+      .order('created_at', { ascending: false });
+    if (error || !data) return [];
+    return data.map((d: any) => ({
+      id: d.id,
+      name: d.name,
+      email: d.email,
+      mobile: d.mobile || undefined,
+      category: d.category,
+      message: d.message,
+      consentGiven: d.consent_given ?? true,
+      status: d.status,
+      replyNotes: d.reply_notes || undefined,
+      createdAt: d.created_at,
+    }));
+  } catch {
+    return [];
   }
 }
 

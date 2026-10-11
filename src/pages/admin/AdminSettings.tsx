@@ -30,6 +30,8 @@ export const AdminSettings: React.FC = () => {
   const [syncingAll, setSyncingAll] = useState(false);
   const [showSqlModal, setShowSqlModal] = useState(false);
 
+  const [saving, setSaving] = useState(false);
+
   const handleTestSupabase = async () => {
     setTestingDb(true);
     const result = await testSupabaseConnection();
@@ -57,7 +59,10 @@ export const AdminSettings: React.FC = () => {
       for (const enq of enquiries) await syncEnquiryToSupabase(enq);
       for (const pay of payments) await syncPaymentToSupabase(pay);
 
-      showToast(`Synchronized ${users.length} users, ${enrollments.length} bookings, and ${eventRegs.length} appointment records to Supabase.`, 'success');
+      // Also push all site content (settings, programs, events, articles, etc.) to cloud
+      await store.syncAllToCloud();
+
+      showToast(`Successfully synchronized all website settings, ${users.length} users, ${enrollments.length} bookings, and programs to Supabase!`, 'success');
     } catch (err: any) {
       showToast('Error during Supabase synchronization: ' + err.message, 'error');
     } finally {
@@ -65,10 +70,13 @@ export const AdminSettings: React.FC = () => {
     }
   };
 
-  const handleSave = (e: React.FormEvent) => {
+  const handleSave = async (e: React.FormEvent) => {
     e.preventDefault();
+    setSaving(true);
     store.updateSettings(form);
-    showToast('Website settings and branding updated globally.', 'success');
+    await store.syncAllToCloud();
+    setSaving(false);
+    showToast('Website settings saved and published live to public website across all devices.', 'success');
   };
 
   return (
@@ -82,13 +90,26 @@ export const AdminSettings: React.FC = () => {
             </p>
           </div>
 
-          <button
-            type="submit"
-            className="inline-flex items-center gap-2 px-6 py-2.5 rounded-full bg-[#153D32] text-white text-xs font-semibold hover:bg-[#0E2922] transition-colors shadow-sm"
-          >
-            <Save className="w-3.5 h-3.5" />
-            <span>Save All Settings</span>
-          </button>
+          <div className="flex items-center gap-3">
+            <button
+              type="button"
+              onClick={handleSyncAllToSupabase}
+              disabled={syncingAll}
+              className="inline-flex items-center gap-1.5 px-4 py-2.5 rounded-full border border-[#153D32]/40 text-[#153D32] text-xs font-semibold hover:bg-[#F8F6F0] transition-colors shadow-2xs disabled:opacity-50"
+            >
+              <RefreshCw className={`w-3.5 h-3.5 ${syncingAll ? 'animate-spin' : ''}`} />
+              <span>{syncingAll ? 'Syncing...' : 'Push Everything to Cloud'}</span>
+            </button>
+
+            <button
+              type="submit"
+              disabled={saving}
+              className="inline-flex items-center gap-2 px-6 py-2.5 rounded-full bg-[#153D32] text-white text-xs font-semibold hover:bg-[#0E2922] transition-colors shadow-sm disabled:opacity-50"
+            >
+              <Save className="w-3.5 h-3.5" />
+              <span>{saving ? 'Publishing...' : 'Save All Settings'}</span>
+            </button>
+          </div>
         </div>
 
         {/* 1. Brand Identity */}
@@ -384,30 +405,38 @@ export const AdminSettings: React.FC = () => {
               <ShieldCheck className="w-4 h-4 text-emerald-700" />
               <span className="font-semibold">Automatic Real-Time Sync Active for:</span>
             </div>
-            <ul className="grid grid-cols-2 sm:grid-cols-3 gap-2 text-[11px] pt-1">
+            <ul className="grid grid-cols-2 sm:grid-cols-4 gap-2 text-[11px] pt-1">
+              <li className="flex items-center gap-1.5 bg-white/70 px-2.5 py-1.5 rounded-lg border border-emerald-200">
+                <span className="w-2 h-2 rounded-full bg-emerald-600"></span>
+                <span><strong>website_settings</strong> (Public Copy)</span>
+              </li>
+              <li className="flex items-center gap-1.5 bg-white/70 px-2.5 py-1.5 rounded-lg border border-emerald-200">
+                <span className="w-2 h-2 rounded-full bg-emerald-600"></span>
+                <span><strong>programs</strong> (Offerings)</span>
+              </li>
+              <li className="flex items-center gap-1.5 bg-white/70 px-2.5 py-1.5 rounded-lg border border-emerald-200">
+                <span className="w-2 h-2 rounded-full bg-emerald-600"></span>
+                <span><strong>events & articles</strong> (Public)</span>
+              </li>
               <li className="flex items-center gap-1.5 bg-white/70 px-2.5 py-1.5 rounded-lg border border-emerald-200">
                 <span className="w-2 h-2 rounded-full bg-emerald-600"></span>
                 <span><strong>users</strong> (Sign-ups & Logins)</span>
               </li>
               <li className="flex items-center gap-1.5 bg-white/70 px-2.5 py-1.5 rounded-lg border border-emerald-200">
                 <span className="w-2 h-2 rounded-full bg-emerald-600"></span>
-                <span><strong>enrollments</strong> (Program Bookings)</span>
+                <span><strong>enrollments</strong> (Bookings)</span>
               </li>
               <li className="flex items-center gap-1.5 bg-white/70 px-2.5 py-1.5 rounded-lg border border-emerald-200">
                 <span className="w-2 h-2 rounded-full bg-emerald-600"></span>
-                <span><strong>event_registrations</strong> (Appointments)</span>
+                <span><strong>event_registrations</strong> (Sessions)</span>
               </li>
               <li className="flex items-center gap-1.5 bg-white/70 px-2.5 py-1.5 rounded-lg border border-emerald-200">
                 <span className="w-2 h-2 rounded-full bg-emerald-600"></span>
-                <span><strong>enquiries</strong> (Consultation Forms)</span>
+                <span><strong>enquiries</strong> (Consultations)</span>
               </li>
               <li className="flex items-center gap-1.5 bg-white/70 px-2.5 py-1.5 rounded-lg border border-emerald-200">
                 <span className="w-2 h-2 rounded-full bg-emerald-600"></span>
-                <span><strong>habit_logs</strong> (Daily Checklists)</span>
-              </li>
-              <li className="flex items-center gap-1.5 bg-white/70 px-2.5 py-1.5 rounded-lg border border-emerald-200">
-                <span className="w-2 h-2 rounded-full bg-emerald-600"></span>
-                <span><strong>payments</strong> (Transaction Records)</span>
+                <span><strong>payments & habits</strong></span>
               </li>
             </ul>
           </div>
