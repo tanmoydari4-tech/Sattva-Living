@@ -1,5 +1,5 @@
 import React from 'react';
-import { BrowserRouter, Routes, Route, useLocation } from 'react-router-dom';
+import { HashRouter, Routes, Route, useLocation } from 'react-router-dom';
 import { LanguageProvider } from './i18n/LanguageContext';
 import { AuthProvider } from './context/AuthContext';
 import { ToastProvider } from './components/Toast';
@@ -65,16 +65,11 @@ const LayoutWrapper: React.FC<{ children: React.ReactNode }> = ({ children }) =>
 };
 
 export default function App() {
-  const basename =
-    import.meta.env.BASE_URL && import.meta.env.BASE_URL !== './'
-      ? import.meta.env.BASE_URL
-      : undefined;
-
   return (
     <LanguageProvider>
       <AuthProvider>
         <ToastProvider>
-          <BrowserRouter basename={basename}>
+          <HashRouter>
             <LayoutWrapper>
               <Routes>
                 {/* 1-11 Public Pages */}
@@ -223,7 +218,7 @@ export default function App() {
                 <Route path="*" element={<NotFound />} />
               </Routes>
             </LayoutWrapper>
-          </BrowserRouter>
+          </HashRouter>
         </ToastProvider>
       </AuthProvider>
     </LanguageProvider>
