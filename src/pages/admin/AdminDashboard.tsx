@@ -13,10 +13,11 @@ import {
   CheckCircle,
 } from 'lucide-react';
 import { AdminLayout } from '../../components/AdminLayout';
-import { store } from '../../services/store';
+import { store, useStoreVersion } from '../../services/store';
 import { useLanguage } from '../../i18n/LanguageContext';
 
 export const AdminDashboard: React.FC = () => {
+  useStoreVersion();
   const { t, isBengali } = useLanguage();
 
   const members = store.getUsers().filter(u => u.role === 'member');

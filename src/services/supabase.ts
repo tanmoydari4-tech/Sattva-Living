@@ -16,8 +16,8 @@ import {
 } from '../types';
 
 export const SUPABASE_PROJECT_ID = 'atmnwxgvnfsrinqrzvij';
-export const SUPABASE_URL = (import.meta.env.VITE_SUPABASE_URL as string) || `https://${SUPABASE_PROJECT_ID}.supabase.co`;
-export const SUPABASE_ANON_KEY = (import.meta.env.VITE_SUPABASE_ANON_KEY as string) || 'sb_publishable_15I7OtmTepRBdcB8mEUG8A_t_65x7Ls';
+export const SUPABASE_URL = (typeof import.meta !== 'undefined' && import.meta.env && import.meta.env.VITE_SUPABASE_URL) || `https://${SUPABASE_PROJECT_ID}.supabase.co`;
+export const SUPABASE_ANON_KEY = (typeof import.meta !== 'undefined' && import.meta.env && import.meta.env.VITE_SUPABASE_ANON_KEY) || 'sb_publishable_15I7OtmTepRBdcB8mEUG8A_t_65x7Ls';
 
 export const supabase = createClient(SUPABASE_URL, SUPABASE_ANON_KEY, {
   auth: {

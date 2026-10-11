@@ -12,9 +12,10 @@ import {
 } from 'lucide-react';
 import { useLanguage } from '../i18n/LanguageContext';
 import { useToast } from '../components/Toast';
-import { store } from '../services/store';
+import { store, useStoreVersion } from '../services/store';
 
 export const Community: React.FC = () => {
+  useStoreVersion();
   const { t, isBengali } = useLanguage();
   const { showToast } = useToast();
 

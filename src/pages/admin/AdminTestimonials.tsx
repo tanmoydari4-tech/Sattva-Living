@@ -1,10 +1,11 @@
 import React, { useState } from 'react';
 import { CheckCircle, XCircle, Trash2, Star, Clock } from 'lucide-react';
 import { AdminLayout } from '../../components/AdminLayout';
-import { store } from '../../services/store';
+import { store, useStoreVersion } from '../../services/store';
 import { useToast } from '../../components/Toast';
 
 export const AdminTestimonials: React.FC = () => {
+  useStoreVersion();
   const { showToast } = useToast();
   const [filter, setFilter] = useState<'all' | 'pending' | 'approved'>('all');
   const testimonials = store.getTestimonials(false);

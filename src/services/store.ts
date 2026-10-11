@@ -608,6 +608,22 @@ export const initialUsers: User[] = [
   },
 ];
 
+function safeGet(key: string): string | null {
+  if (typeof window === 'undefined' || typeof localStorage === 'undefined') return null;
+  try {
+    return localStorage.getItem(key);
+  } catch {
+    return null;
+  }
+}
+
+function safeSet(key: string, value: string): void {
+  if (typeof window === 'undefined' || typeof localStorage === 'undefined') return;
+  try {
+    localStorage.setItem(key, value);
+  } catch {}
+}
+
 // Store Helper Class managing reactive state + localStorage persistence
 class DataStore {
   private listeners: (() => void)[] = [];
@@ -626,29 +642,29 @@ class DataStore {
   }
 
   private init() {
-    const savedSettings = localStorage.getItem('sattva_settings');
+    const savedSettings = safeGet('sattva_settings');
     if (!savedSettings) {
-      localStorage.setItem('sattva_settings', JSON.stringify(initialSettings));
+      safeSet('sattva_settings', JSON.stringify(initialSettings));
     }
-    if (!localStorage.getItem('sattva_programs')) {
-      localStorage.setItem('sattva_programs', JSON.stringify(initialPrograms));
+    if (!safeGet('sattva_programs')) {
+      safeSet('sattva_programs', JSON.stringify(initialPrograms));
     }
-    if (!localStorage.getItem('sattva_events')) {
-      localStorage.setItem('sattva_events', JSON.stringify(initialEvents));
+    if (!safeGet('sattva_events')) {
+      safeSet('sattva_events', JSON.stringify(initialEvents));
     }
-    if (!localStorage.getItem('sattva_articles')) {
-      localStorage.setItem('sattva_articles', JSON.stringify(initialArticles));
+    if (!safeGet('sattva_articles')) {
+      safeSet('sattva_articles', JSON.stringify(initialArticles));
     }
-    if (!localStorage.getItem('sattva_testimonials')) {
-      localStorage.setItem('sattva_testimonials', JSON.stringify(initialTestimonials));
+    if (!safeGet('sattva_testimonials')) {
+      safeSet('sattva_testimonials', JSON.stringify(initialTestimonials));
     }
-    if (!localStorage.getItem('sattva_gallery')) {
-      localStorage.setItem('sattva_gallery', JSON.stringify(initialGallery));
+    if (!safeGet('sattva_gallery')) {
+      safeSet('sattva_gallery', JSON.stringify(initialGallery));
     }
-    if (!localStorage.getItem('sattva_users')) {
-      localStorage.setItem('sattva_users', JSON.stringify(initialUsers));
+    if (!safeGet('sattva_users')) {
+      safeSet('sattva_users', JSON.stringify(initialUsers));
     }
-    if (!localStorage.getItem('sattva_enrollments')) {
+    if (!safeGet('sattva_enrollments')) {
       const demoEnrollment: Enrollment = {
         id: 'enr-demo-1',
         userId: 'user-member-1',
@@ -660,9 +676,9 @@ class DataStore {
         amountPaid: 2499,
         enrolledAt: '2026-09-15T10:00:00Z',
       };
-      localStorage.setItem('sattva_enrollments', JSON.stringify([demoEnrollment]));
+      safeSet('sattva_enrollments', JSON.stringify([demoEnrollment]));
     }
-    if (!localStorage.getItem('sattva_event_registrations')) {
+    if (!safeGet('sattva_event_registrations')) {
       const demoEventReg: EventRegistration = {
         id: 'reg-demo-1',
         userId: 'user-member-1',
@@ -675,9 +691,9 @@ class DataStore {
         registeredAt: '2026-09-20T10:00:00Z',
         status: 'confirmed',
       };
-      localStorage.setItem('sattva_event_registrations', JSON.stringify([demoEventReg]));
+      safeSet('sattva_event_registrations', JSON.stringify([demoEventReg]));
     }
-    if (!localStorage.getItem('sattva_habit_logs')) {
+    if (!safeGet('sattva_habit_logs')) {
       // Seed habit logs for the last 6 days for the demo member
       const logs: HabitLog[] = [];
       for (let i = 5; i >= 0; i--) {
@@ -700,9 +716,9 @@ class DataStore {
           dailyNote: 'Felt calm and steady throughout the day.',
         });
       }
-      localStorage.setItem('sattva_habit_logs', JSON.stringify(logs));
+      safeSet('sattva_habit_logs', JSON.stringify(logs));
     }
-    if (!localStorage.getItem('sattva_enquiries')) {
+    if (!safeGet('sattva_enquiries')) {
       const sampleEnquiries: Enquiry[] = [
         {
           id: 'enq-1',
@@ -716,9 +732,9 @@ class DataStore {
           createdAt: '2026-09-28T11:20:00Z',
         },
       ];
-      localStorage.setItem('sattva_enquiries', JSON.stringify(sampleEnquiries));
+      safeSet('sattva_enquiries', JSON.stringify(sampleEnquiries));
     }
-    if (!localStorage.getItem('sattva_payments')) {
+    if (!safeGet('sattva_payments')) {
       const samplePayments: PaymentRecord[] = [
         {
           id: 'pay-1',
@@ -738,9 +754,9 @@ class DataStore {
           verifiedByAdmin: true,
         },
       ];
-      localStorage.setItem('sattva_payments', JSON.stringify(samplePayments));
+      safeSet('sattva_payments', JSON.stringify(samplePayments));
     }
-    if (!localStorage.getItem('sattva_announcements')) {
+    if (!safeGet('sattva_announcements')) {
       const sampleAnnouncements: Announcement[] = [
         {
           id: 'ann-1',
@@ -753,7 +769,7 @@ class DataStore {
           active: true,
         },
       ];
-      localStorage.setItem('sattva_announcements', JSON.stringify(sampleAnnouncements));
+      safeSet('sattva_announcements', JSON.stringify(sampleAnnouncements));
     }
   }
 
@@ -765,7 +781,13 @@ class DataStore {
   }
 
   private notify() {
-    this.listeners.forEach(fn => fn());
+    this.listeners.forEach(fn => {
+      try {
+        fn();
+      } catch (e) {
+        console.warn('Store listener error:', e);
+      }
+    });
   }
 
   public reloadFromLocalStorage() {
@@ -780,32 +802,52 @@ class DataStore {
       let changed = false;
 
       if (cloudData.settings) {
-        localStorage.setItem('sattva_settings', JSON.stringify(cloudData.settings));
+        safeSet('sattva_settings', JSON.stringify(cloudData.settings));
         changed = true;
+      } else {
+        syncContentItemToSupabase('sync_settings', this.getSettings());
       }
-      if (cloudData.programs && cloudData.programs.length > 0) {
-        localStorage.setItem('sattva_programs', JSON.stringify(cloudData.programs));
+
+      if (Array.isArray(cloudData.programs) && cloudData.programs.length > 0) {
+        safeSet('sattva_programs', JSON.stringify(cloudData.programs));
         changed = true;
+      } else if (!cloudData.programs) {
+        syncContentItemToSupabase('sync_programs', this.getPrograms());
       }
-      if (cloudData.events && cloudData.events.length > 0) {
-        localStorage.setItem('sattva_events', JSON.stringify(cloudData.events));
+
+      if (Array.isArray(cloudData.events) && cloudData.events.length > 0) {
+        safeSet('sattva_events', JSON.stringify(cloudData.events));
         changed = true;
+      } else if (!cloudData.events) {
+        syncContentItemToSupabase('sync_events', this.getEvents());
       }
-      if (cloudData.articles && cloudData.articles.length > 0) {
-        localStorage.setItem('sattva_articles', JSON.stringify(cloudData.articles));
+
+      if (Array.isArray(cloudData.articles) && cloudData.articles.length > 0) {
+        safeSet('sattva_articles', JSON.stringify(cloudData.articles));
         changed = true;
+      } else if (!cloudData.articles) {
+        syncContentItemToSupabase('sync_articles', this.getArticles());
       }
-      if (cloudData.testimonials && cloudData.testimonials.length > 0) {
-        localStorage.setItem('sattva_testimonials', JSON.stringify(cloudData.testimonials));
+
+      if (Array.isArray(cloudData.testimonials) && cloudData.testimonials.length > 0) {
+        safeSet('sattva_testimonials', JSON.stringify(cloudData.testimonials));
         changed = true;
+      } else if (!cloudData.testimonials) {
+        syncContentItemToSupabase('sync_testimonials', this.getTestimonials(false));
       }
-      if (cloudData.gallery && cloudData.gallery.length > 0) {
-        localStorage.setItem('sattva_gallery', JSON.stringify(cloudData.gallery));
+
+      if (Array.isArray(cloudData.gallery) && cloudData.gallery.length > 0) {
+        safeSet('sattva_gallery', JSON.stringify(cloudData.gallery));
         changed = true;
+      } else if (!cloudData.gallery) {
+        syncContentItemToSupabase('sync_gallery', this.getGallery());
       }
-      if (cloudData.announcements && cloudData.announcements.length > 0) {
-        localStorage.setItem('sattva_announcements', JSON.stringify(cloudData.announcements));
+
+      if (Array.isArray(cloudData.announcements) && cloudData.announcements.length > 0) {
+        safeSet('sattva_announcements', JSON.stringify(cloudData.announcements));
         changed = true;
+      } else if (!cloudData.announcements) {
+        syncContentItemToSupabase('sync_announcements', this.getAnnouncements());
       }
 
       // Merge remote contact enquiries
@@ -822,7 +864,7 @@ class DataStore {
           }
         }
         if (addedNew) {
-          localStorage.setItem('sattva_enquiries', JSON.stringify(localEnquiries));
+          safeSet('sattva_enquiries', JSON.stringify(localEnquiries));
           changed = true;
         }
       }
@@ -859,12 +901,12 @@ class DataStore {
 
   // --- GETTERS ---
   getSettings(): WebsiteSettings {
-    const data = localStorage.getItem('sattva_settings');
+    const data = safeGet('sattva_settings');
     return data ? JSON.parse(data) : initialSettings;
   }
 
   getPrograms(): Program[] {
-    const data = localStorage.getItem('sattva_programs');
+    const data = safeGet('sattva_programs');
     return data ? JSON.parse(data) : [];
   }
 
@@ -873,7 +915,7 @@ class DataStore {
   }
 
   getEvents(): WellnessEvent[] {
-    const data = localStorage.getItem('sattva_events');
+    const data = safeGet('sattva_events');
     return data ? JSON.parse(data) : [];
   }
 
@@ -882,7 +924,7 @@ class DataStore {
   }
 
   getArticles(): Article[] {
-    const data = localStorage.getItem('sattva_articles');
+    const data = safeGet('sattva_articles');
     return data ? JSON.parse(data) : [];
   }
 
@@ -891,18 +933,18 @@ class DataStore {
   }
 
   getTestimonials(onlyApproved = true): Testimonial[] {
-    const data = localStorage.getItem('sattva_testimonials');
+    const data = safeGet('sattva_testimonials');
     const all: Testimonial[] = data ? JSON.parse(data) : [];
     return onlyApproved ? all.filter(t => t.status === 'approved') : all;
   }
 
   getGallery(): GalleryItem[] {
-    const data = localStorage.getItem('sattva_gallery');
+    const data = safeGet('sattva_gallery');
     return data ? JSON.parse(data) : [];
   }
 
   getUsers(): User[] {
-    const data = localStorage.getItem('sattva_users');
+    const data = safeGet('sattva_users');
     return data ? JSON.parse(data) : [];
   }
 
@@ -911,43 +953,43 @@ class DataStore {
   }
 
   getEnrollments(userId?: string): Enrollment[] {
-    const data = localStorage.getItem('sattva_enrollments');
+    const data = safeGet('sattva_enrollments');
     const all: Enrollment[] = data ? JSON.parse(data) : [];
     return userId ? all.filter(e => e.userId === userId) : all;
   }
 
   getEventRegistrations(userId?: string): EventRegistration[] {
-    const data = localStorage.getItem('sattva_event_registrations');
+    const data = safeGet('sattva_event_registrations');
     const all: EventRegistration[] = data ? JSON.parse(data) : [];
     return userId ? all.filter(r => r.userId === userId) : all;
   }
 
   getHabitLogs(userId: string): HabitLog[] {
-    const data = localStorage.getItem('sattva_habit_logs');
+    const data = safeGet('sattva_habit_logs');
     const all: HabitLog[] = data ? JSON.parse(data) : [];
     return all.filter(h => h.userId === userId).sort((a, b) => b.date.localeCompare(a.date));
   }
 
   getEnquiries(): Enquiry[] {
-    const data = localStorage.getItem('sattva_enquiries');
+    const data = safeGet('sattva_enquiries');
     const all: Enquiry[] = data ? JSON.parse(data) : [];
     return all.filter(e => (e.category as string) !== 'system_sync' && (e.category as string) !== 'system_config');
   }
 
   getPayments(userId?: string): PaymentRecord[] {
-    const data = localStorage.getItem('sattva_payments');
+    const data = safeGet('sattva_payments');
     const all: PaymentRecord[] = data ? JSON.parse(data) : [];
     return userId ? all.filter(p => p.userId === userId) : all;
   }
 
   getAnnouncements(): Announcement[] {
-    const data = localStorage.getItem('sattva_announcements');
+    const data = safeGet('sattva_announcements');
     return data ? JSON.parse(data) : [];
   }
 
   // --- SETTERS & MUTATIONS ---
   updateSettings(settings: WebsiteSettings) {
-    localStorage.setItem('sattva_settings', JSON.stringify(settings));
+    safeSet('sattva_settings', JSON.stringify(settings));
     this.notify();
     syncContentItemToSupabase('sync_settings', settings);
   }
@@ -966,14 +1008,14 @@ class DataStore {
         updatedAt: new Date().toISOString(),
       });
     }
-    localStorage.setItem('sattva_programs', JSON.stringify(programs));
+    safeSet('sattva_programs', JSON.stringify(programs));
     this.notify();
     syncContentItemToSupabase('sync_programs', programs);
   }
 
   deleteProgram(id: string) {
     const programs = this.getPrograms().filter(p => p.id !== id);
-    localStorage.setItem('sattva_programs', JSON.stringify(programs));
+    safeSet('sattva_programs', JSON.stringify(programs));
     this.notify();
     syncContentItemToSupabase('sync_programs', programs);
   }
@@ -991,14 +1033,14 @@ class DataStore {
         createdAt: new Date().toISOString(),
       });
     }
-    localStorage.setItem('sattva_events', JSON.stringify(events));
+    safeSet('sattva_events', JSON.stringify(events));
     this.notify();
     syncContentItemToSupabase('sync_events', events);
   }
 
   deleteEvent(id: string) {
     const events = this.getEvents().filter(e => e.id !== id);
-    localStorage.setItem('sattva_events', JSON.stringify(events));
+    safeSet('sattva_events', JSON.stringify(events));
     this.notify();
     syncContentItemToSupabase('sync_events', events);
   }
@@ -1016,14 +1058,14 @@ class DataStore {
         publishedDate: new Date().toISOString().split('T')[0],
       });
     }
-    localStorage.setItem('sattva_articles', JSON.stringify(articles));
+    safeSet('sattva_articles', JSON.stringify(articles));
     this.notify();
     syncContentItemToSupabase('sync_articles', articles);
   }
 
   deleteArticle(id: string) {
     const articles = this.getArticles().filter(a => a.id !== id);
-    localStorage.setItem('sattva_articles', JSON.stringify(articles));
+    safeSet('sattva_articles', JSON.stringify(articles));
     this.notify();
     syncContentItemToSupabase('sync_articles', articles);
   }
@@ -1041,14 +1083,14 @@ class DataStore {
         date: new Date().toISOString().split('T')[0],
       });
     }
-    localStorage.setItem('sattva_gallery', JSON.stringify(gallery));
+    safeSet('sattva_gallery', JSON.stringify(gallery));
     this.notify();
     syncContentItemToSupabase('sync_gallery', gallery);
   }
 
   deleteGalleryItem(id: string) {
     const gallery = this.getGallery().filter(g => g.id !== id);
-    localStorage.setItem('sattva_gallery', JSON.stringify(gallery));
+    safeSet('sattva_gallery', JSON.stringify(gallery));
     this.notify();
     syncContentItemToSupabase('sync_gallery', gallery);
   }
@@ -1066,14 +1108,14 @@ class DataStore {
         publishedAt: new Date().toISOString().split('T')[0],
       });
     }
-    localStorage.setItem('sattva_announcements', JSON.stringify(announcements));
+    safeSet('sattva_announcements', JSON.stringify(announcements));
     this.notify();
     syncContentItemToSupabase('sync_announcements', announcements);
   }
 
   deleteAnnouncement(id: string) {
     const announcements = this.getAnnouncements().filter(a => a.id !== id);
-    localStorage.setItem('sattva_announcements', JSON.stringify(announcements));
+    safeSet('sattva_announcements', JSON.stringify(announcements));
     this.notify();
     syncContentItemToSupabase('sync_announcements', announcements);
   }
@@ -1088,7 +1130,7 @@ class DataStore {
       submittedAt: new Date().toISOString(),
     };
     testimonials.unshift(newTestimonial);
-    localStorage.setItem('sattva_testimonials', JSON.stringify(testimonials));
+    safeSet('sattva_testimonials', JSON.stringify(testimonials));
     this.notify();
     syncContentItemToSupabase('sync_testimonials', testimonials);
     return newTestimonial;
@@ -1099,7 +1141,7 @@ class DataStore {
     const item = testimonials.find(t => t.id === id);
     if (item) {
       item.status = status;
-      localStorage.setItem('sattva_testimonials', JSON.stringify(testimonials));
+      safeSet('sattva_testimonials', JSON.stringify(testimonials));
       this.notify();
       syncContentItemToSupabase('sync_testimonials', testimonials);
     }
@@ -1107,7 +1149,7 @@ class DataStore {
 
   deleteTestimonial(id: string) {
     const testimonials = this.getTestimonials(false).filter(t => t.id !== id);
-    localStorage.setItem('sattva_testimonials', JSON.stringify(testimonials));
+    safeSet('sattva_testimonials', JSON.stringify(testimonials));
     this.notify();
     syncContentItemToSupabase('sync_testimonials', testimonials);
   }
@@ -1122,7 +1164,7 @@ class DataStore {
       createdAt: new Date().toISOString(),
     };
     enquiries.unshift(newEnquiry);
-    localStorage.setItem('sattva_enquiries', JSON.stringify(enquiries));
+    safeSet('sattva_enquiries', JSON.stringify(enquiries));
     syncEnquiryToSupabase(newEnquiry);
     this.notify();
     return newEnquiry;
@@ -1134,7 +1176,7 @@ class DataStore {
     if (item) {
       item.status = status;
       if (notes) item.replyNotes = notes;
-      localStorage.setItem('sattva_enquiries', JSON.stringify(enquiries));
+      safeSet('sattva_enquiries', JSON.stringify(enquiries));
       syncEnquiryToSupabase(item);
       this.notify();
     }
@@ -1151,7 +1193,7 @@ class DataStore {
     } else {
       users.push(user);
     }
-    localStorage.setItem('sattva_users', JSON.stringify(users));
+    safeSet('sattva_users', JSON.stringify(users));
     syncUserToSupabase(finalUser);
     this.notify();
   }
@@ -1162,7 +1204,7 @@ class DataStore {
     if (user) {
       user.membershipStatus = user.membershipStatus === 'active' ? 'inactive' : 'active';
       user.updatedAt = new Date().toISOString();
-      localStorage.setItem('sattva_users', JSON.stringify(users));
+      safeSet('sattva_users', JSON.stringify(users));
       syncUserToSupabase(user);
       this.notify();
     }
@@ -1181,7 +1223,7 @@ class DataStore {
       enrolledAt: new Date().toISOString(),
     };
     enrollments.unshift(newEnrollment);
-    localStorage.setItem('sattva_enrollments', JSON.stringify(enrollments));
+    safeSet('sattva_enrollments', JSON.stringify(enrollments));
     syncEnrollmentToSupabase(newEnrollment);
     this.notify();
     return newEnrollment;
@@ -1199,14 +1241,14 @@ class DataStore {
       registeredAt: new Date().toISOString(),
     };
     regs.unshift(newReg);
-    localStorage.setItem('sattva_event_registrations', JSON.stringify(regs));
+    safeSet('sattva_event_registrations', JSON.stringify(regs));
 
     // Increment event registeredCount
     const events = this.getEvents();
     const event = events.find(e => e.id === registration.eventId);
     if (event) {
       event.registeredCount = (event.registeredCount || 0) + 1;
-      localStorage.setItem('sattva_events', JSON.stringify(events));
+      safeSet('sattva_events', JSON.stringify(events));
     }
 
     syncEventRegistrationToSupabase(newReg);
@@ -1230,10 +1272,10 @@ class DataStore {
       logs.unshift(finalLog);
     }
     // Update all logs in storage
-    const allData = localStorage.getItem('sattva_habit_logs');
+    const allData = safeGet('sattva_habit_logs');
     const all: HabitLog[] = allData ? JSON.parse(allData) : [];
     const otherUsersLogs = all.filter(l => l.userId !== log.userId);
-    localStorage.setItem('sattva_habit_logs', JSON.stringify([...logs, ...otherUsersLogs]));
+    safeSet('sattva_habit_logs', JSON.stringify([...logs, ...otherUsersLogs]));
     syncHabitLogToSupabase(finalLog);
     this.notify();
   }
@@ -1247,7 +1289,7 @@ class DataStore {
       createdAt: new Date().toISOString(),
     };
     payments.unshift(newPayment);
-    localStorage.setItem('sattva_payments', JSON.stringify(payments));
+    safeSet('sattva_payments', JSON.stringify(payments));
     syncPaymentToSupabase(newPayment);
     this.notify();
     return newPayment;
@@ -1259,7 +1301,7 @@ class DataStore {
     if (payment) {
       payment.verifiedByAdmin = true;
       payment.status = 'completed';
-      localStorage.setItem('sattva_payments', JSON.stringify(payments));
+      safeSet('sattva_payments', JSON.stringify(payments));
       this.notify();
     }
   }

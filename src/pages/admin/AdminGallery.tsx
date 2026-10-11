@@ -1,12 +1,13 @@
 import React, { useState } from 'react';
 import { Plus, Trash2, Image as ImageIcon } from 'lucide-react';
 import { AdminLayout } from '../../components/AdminLayout';
-import { store } from '../../services/store';
+import { store, useStoreVersion } from '../../services/store';
 import { useToast } from '../../components/Toast';
 import { GalleryItem } from '../../types';
 import { Modal } from '../../components/Modal';
 
 export const AdminGallery: React.FC = () => {
+  useStoreVersion();
   const { showToast } = useToast();
   const gallery = store.getGallery();
 

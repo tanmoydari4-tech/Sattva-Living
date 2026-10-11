@@ -1,10 +1,11 @@
 import React, { useState } from 'react';
 import { Mail, Phone, MessageSquare, CheckCircle, Clock, Archive } from 'lucide-react';
 import { AdminLayout } from '../../components/AdminLayout';
-import { store } from '../../services/store';
+import { store, useStoreVersion } from '../../services/store';
 import { useToast } from '../../components/Toast';
 
 export const AdminEnquiries: React.FC = () => {
+  useStoreVersion();
   const { showToast } = useToast();
   const enquiries = store.getEnquiries();
 

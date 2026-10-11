@@ -1,12 +1,13 @@
 import React, { useState } from 'react';
 import { Plus, Edit2, Trash2, Eye, EyeOff, Save, X, Layers } from 'lucide-react';
 import { AdminLayout } from '../../components/AdminLayout';
-import { store } from '../../services/store';
+import { store, useStoreVersion } from '../../services/store';
 import { useToast } from '../../components/Toast';
 import { Program, ProgramCategory } from '../../types';
 import { Modal } from '../../components/Modal';
 
 export const AdminPrograms: React.FC = () => {
+  useStoreVersion();
   const { showToast } = useToast();
   const programs = store.getPrograms();
 

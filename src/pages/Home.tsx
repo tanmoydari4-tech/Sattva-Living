@@ -17,10 +17,11 @@ import {
   ShieldCheck,
 } from 'lucide-react';
 import { useLanguage } from '../i18n/LanguageContext';
-import { store } from '../services/store';
+import { store, useStoreVersion } from '../services/store';
 import { EventCountdown } from '../components/EventCountdown';
 
 export const Home: React.FC = () => {
+  useStoreVersion();
   const { t, isBengali } = useLanguage();
   const settings = store.getSettings();
   const programs = store.getPrograms().filter(p => p.published).slice(0, 3);
@@ -30,6 +31,8 @@ export const Home: React.FC = () => {
 
   const heroTitle = isBengali ? (settings.heroTitleBn || settings.heroTitle) : settings.heroTitle;
   const heroSubtitle = isBengali ? (settings.heroSubtitleBn || settings.heroSubtitle) : settings.heroSubtitle;
+  const philosophyQuote = isBengali ? (settings.philosophyBn || settings.philosophy || t.philosophy.quote) : (settings.philosophy || t.philosophy.quote);
+  const philosophyTagline = isBengali ? (settings.taglineBn || settings.tagline || t.philosophy.tagline) : (settings.tagline || t.philosophy.tagline);
 
   const [activeFaq, setActiveFaq] = useState<number | null>(null);
 
@@ -152,10 +155,10 @@ export const Home: React.FC = () => {
       <section className="max-w-4xl mx-auto px-4 text-center">
         <div className="bg-white p-8 sm:p-12 rounded-3xl border border-[#A8BDA5]/40 shadow-xs space-y-4">
           <span className="text-xs uppercase tracking-widest text-[#C6A66A] font-semibold">
-            {t.philosophy.tagline}
+            {philosophyTagline}
           </span>
           <blockquote className="font-serif text-2xl sm:text-3xl lg:text-4xl text-[#153D32] font-medium leading-snug">
-            {t.philosophy.quote}
+            {philosophyQuote}
           </blockquote>
           <p className="text-sm text-[#252A27]/70 max-w-xl mx-auto leading-relaxed">
             {isBengali

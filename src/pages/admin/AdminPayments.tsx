@@ -1,12 +1,13 @@
 import React, { useState } from 'react';
 import { CreditCard, CheckCircle, ShieldCheck, Download, FileText } from 'lucide-react';
 import { AdminLayout } from '../../components/AdminLayout';
-import { store } from '../../services/store';
+import { store, useStoreVersion } from '../../services/store';
 import { useToast } from '../../components/Toast';
 import { ReceiptModal } from '../../components/ReceiptModal';
 import { PaymentRecord } from '../../types';
 
 export const AdminPayments: React.FC = () => {
+  useStoreVersion();
   const { showToast } = useToast();
   const payments = store.getPayments();
   const [selectedPayment, setSelectedPayment] = useState<PaymentRecord | null>(null);

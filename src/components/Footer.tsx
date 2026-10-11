@@ -3,9 +3,10 @@ import { Link } from 'react-router-dom';
 import { Mail, Phone, MapPin, MessageCircle, Heart, ArrowUpRight } from 'lucide-react';
 import { BrandLogo } from './BrandLogo';
 import { useLanguage } from '../i18n/LanguageContext';
-import { store } from '../services/store';
+import { store, useStoreVersion } from '../services/store';
 
 export const Footer: React.FC = () => {
+  useStoreVersion();
   const { t, isBengali } = useLanguage();
   const settings = store.getSettings();
 

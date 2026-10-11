@@ -7,7 +7,7 @@ import { useToast } from '../components/Toast';
 
 export const AdminLogin: React.FC = () => {
   const { t, isBengali } = useLanguage();
-  const { login, quickLoginAsAdmin } = useAuth();
+  const { login } = useAuth();
   const { showToast } = useToast();
   const navigate = useNavigate();
 
@@ -29,12 +29,6 @@ export const AdminLogin: React.FC = () => {
     }
   };
 
-  const handleQuickDemoAdmin = () => {
-    quickLoginAsAdmin();
-    showToast(isBengali ? 'অ্যাডমিন হিসেবে দ্রুত লগইন করা হয়েছে।' : 'Logged in as Chief Wellness Admin.', 'success');
-    navigate('/admin');
-  };
-
   return (
     <div className="min-h-[85vh] flex items-center justify-center px-4 py-16 bg-[#F1ECE0]">
       <div className="max-w-md w-full bg-white rounded-3xl p-8 sm:p-10 border border-[#A8BDA5]/40 shadow-2xl space-y-6">
@@ -48,20 +42,6 @@ export const AdminLogin: React.FC = () => {
           <p className="text-xs text-[#252A27]/70">
             {t.admin.loginSubtitle}
           </p>
-        </div>
-
-        {/* Quick Demo Admin Button */}
-        <div className="p-4 bg-[#F8F6F0] rounded-2xl border border-[#A8BDA5]/30 text-center space-y-2">
-          <span className="text-[11px] font-semibold text-[#153D32] uppercase tracking-wider block">
-            Instant Demo Administrator Access
-          </span>
-          <button
-            type="button"
-            onClick={handleQuickDemoAdmin}
-            className="w-full py-2.5 px-4 rounded-xl bg-[#153D32] text-[#DFCA9B] text-xs font-semibold hover:bg-[#0E2922] transition-colors shadow-xs"
-          >
-            One-Click Sign In as Admin
-          </button>
         </div>
 
         <form onSubmit={handleSubmit} className="space-y-4">

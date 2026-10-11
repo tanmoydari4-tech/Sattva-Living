@@ -1,10 +1,11 @@
 import React, { useState } from 'react';
 import { Search, Download, CheckCircle, XCircle, Shield, User } from 'lucide-react';
 import { AdminLayout } from '../../components/AdminLayout';
-import { store } from '../../services/store';
+import { store, useStoreVersion } from '../../services/store';
 import { useToast } from '../../components/Toast';
 
 export const AdminMembers: React.FC = () => {
+  useStoreVersion();
   const { showToast } = useToast();
   const [searchTerm, setSearchTerm] = useState('');
   const members = store.getUsers();

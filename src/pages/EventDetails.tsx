@@ -17,10 +17,11 @@ import {
 import { useLanguage } from '../i18n/LanguageContext';
 import { useAuth } from '../context/AuthContext';
 import { useToast } from '../components/Toast';
-import { store } from '../services/store';
+import { store, useStoreVersion } from '../services/store';
 import { EventCountdown } from '../components/EventCountdown';
 
 export const EventDetails: React.FC = () => {
+  useStoreVersion();
   const { id } = useParams<{ id: string }>();
   const navigate = useNavigate();
   const { t, isBengali } = useLanguage();

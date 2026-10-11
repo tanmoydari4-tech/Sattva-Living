@@ -1,11 +1,12 @@
 import React, { useState } from 'react';
 import { Camera, Calendar, Maximize2 } from 'lucide-react';
 import { useLanguage } from '../i18n/LanguageContext';
-import { store } from '../services/store';
+import { store, useStoreVersion } from '../services/store';
 import { GalleryItem } from '../types';
 import { ImageLightbox } from '../components/ImageLightbox';
 
 export const Gallery: React.FC = () => {
+  useStoreVersion();
   const { isBengali } = useLanguage();
   const [selectedCategory, setSelectedCategory] = useState<string>('all');
   const [activeItem, setActiveItem] = useState<GalleryItem | null>(null);

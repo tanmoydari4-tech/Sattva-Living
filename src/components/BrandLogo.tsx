@@ -1,7 +1,7 @@
 import React from 'react';
 import { Link } from 'react-router-dom';
 import { useLanguage } from '../i18n/LanguageContext';
-import { store } from '../services/store';
+import { store, useStoreVersion } from '../services/store';
 
 interface BrandLogoProps {
   variant?: 'light' | 'dark' | 'cream';
@@ -14,6 +14,7 @@ export const BrandLogo: React.FC<BrandLogoProps> = ({
   className = '',
   showTagline = false,
 }) => {
+  useStoreVersion();
   const { isBengali } = useLanguage();
   const settings = store.getSettings();
 

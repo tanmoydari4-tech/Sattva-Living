@@ -1,12 +1,13 @@
 import React, { useState } from 'react';
 import { Plus, Edit2, Trash2, Calendar, Video, Clock, Users } from 'lucide-react';
 import { AdminLayout } from '../../components/AdminLayout';
-import { store } from '../../services/store';
+import { store, useStoreVersion } from '../../services/store';
 import { useToast } from '../../components/Toast';
 import { WellnessEvent } from '../../types';
 import { Modal } from '../../components/Modal';
 
 export const AdminEvents: React.FC = () => {
+  useStoreVersion();
   const { showToast } = useToast();
   const events = store.getEvents();
 

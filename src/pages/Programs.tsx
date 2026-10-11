@@ -2,10 +2,11 @@ import React, { useState, useMemo } from 'react';
 import { Link, useSearchParams } from 'react-router-dom';
 import { Search, ArrowRight, Clock, Users, CheckCircle2 } from 'lucide-react';
 import { useLanguage } from '../i18n/LanguageContext';
-import { store } from '../services/store';
+import { store, useStoreVersion } from '../services/store';
 import { ProgramCategory } from '../types';
 
 export const Programs: React.FC = () => {
+  useStoreVersion();
   const { t, isBengali } = useLanguage();
   const [searchParams, setSearchParams] = useSearchParams();
   const selectedCategory = (searchParams.get('category') || 'all') as string;

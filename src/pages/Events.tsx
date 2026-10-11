@@ -15,10 +15,11 @@ import {
 import { useLanguage } from '../i18n/LanguageContext';
 import { useAuth } from '../context/AuthContext';
 import { useToast } from '../components/Toast';
-import { store } from '../services/store';
+import { store, useStoreVersion } from '../services/store';
 import { EventCountdown } from '../components/EventCountdown';
 
 export const Events: React.FC = () => {
+  useStoreVersion();
   const { t, isBengali } = useLanguage();
   const { currentUser, isAuthenticated } = useAuth();
   const { showToast } = useToast();

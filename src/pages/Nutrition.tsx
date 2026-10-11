@@ -12,9 +12,10 @@ import {
   CheckCircle2,
 } from 'lucide-react';
 import { useLanguage } from '../i18n/LanguageContext';
-import { store } from '../services/store';
+import { store, useStoreVersion } from '../services/store';
 
 export const Nutrition: React.FC = () => {
+  useStoreVersion();
   const { t, isBengali } = useLanguage();
   const [selectedCategory, setSelectedCategory] = useState<string>('all');
 

@@ -14,12 +14,13 @@ import {
 import { useLanguage } from '../i18n/LanguageContext';
 import { useAuth } from '../context/AuthContext';
 import { useToast } from '../components/Toast';
-import { store } from '../services/store';
+import { store, useStoreVersion } from '../services/store';
 import { Modal } from '../components/Modal';
 import { ReceiptModal } from '../components/ReceiptModal';
 import { PaymentRecord } from '../types';
 
 export const ProgramDetails: React.FC = () => {
+  useStoreVersion();
   const { id } = useParams<{ id: string }>();
   const navigate = useNavigate();
   const { t, isBengali } = useLanguage();

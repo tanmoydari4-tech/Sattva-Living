@@ -2,9 +2,10 @@ import React, { useState } from 'react';
 import { Mail, Phone, MapPin, MessageCircle, Send, CheckCircle2, ShieldCheck, ArrowUpRight } from 'lucide-react';
 import { useLanguage } from '../i18n/LanguageContext';
 import { useToast } from '../components/Toast';
-import { store } from '../services/store';
+import { store, useStoreVersion } from '../services/store';
 
 export const Contact: React.FC = () => {
+  useStoreVersion();
   const { t, isBengali } = useLanguage();
   const { showToast } = useToast();
   const settings = store.getSettings();

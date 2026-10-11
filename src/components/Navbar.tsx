@@ -4,8 +4,10 @@ import { Menu, X, Globe, User as UserIcon, Shield, Sparkles } from 'lucide-react
 import { BrandLogo } from './BrandLogo';
 import { useLanguage } from '../i18n/LanguageContext';
 import { useAuth } from '../context/AuthContext';
+import { useStoreVersion } from '../services/store';
 
 export const Navbar: React.FC = () => {
+  useStoreVersion();
   const [isScrolled, setIsScrolled] = useState(false);
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const { language, setLanguage, t } = useLanguage();

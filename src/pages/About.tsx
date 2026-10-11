@@ -2,13 +2,17 @@ import React from 'react';
 import { Link } from 'react-router-dom';
 import { CheckCircle2, Heart, Compass, Sparkles, Sun, Moon, Users, Shield } from 'lucide-react';
 import { useLanguage } from '../i18n/LanguageContext';
-import { store } from '../services/store';
+import { store, useStoreVersion } from '../services/store';
 
 export const About: React.FC = () => {
+  useStoreVersion();
   const { t, isBengali } = useLanguage();
   const settings = store.getSettings();
 
   const brandName = isBengali ? (settings.brandNameBn || settings.brandName) : settings.brandName;
+  const philosophyDesc = isBengali
+    ? (settings.philosophyBn || settings.philosophy || t.about.philosophyDesc)
+    : (settings.philosophy || t.about.philosophyDesc);
 
   return (
     <div className="space-y-20 pb-20">
@@ -45,7 +49,7 @@ export const About: React.FC = () => {
                 {t.about.philosophyTitle}
               </span>
               <p className="font-serif text-lg text-[#153D32] font-semibold">
-                {t.about.philosophyDesc}
+                {philosophyDesc}
               </p>
             </div>
           </div>

@@ -3,9 +3,10 @@ import { useParams, Link } from 'react-router-dom';
 import { ArrowLeft, Clock, Calendar, User, Share2, ArrowRight } from 'lucide-react';
 import { useLanguage } from '../i18n/LanguageContext';
 import { useToast } from '../components/Toast';
-import { store } from '../services/store';
+import { store, useStoreVersion } from '../services/store';
 
 export const ArticleDetails: React.FC = () => {
+  useStoreVersion();
   const { id } = useParams<{ id: string }>();
   const { t, isBengali } = useLanguage();
   const { showToast } = useToast();
